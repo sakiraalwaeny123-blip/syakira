@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Bahan Ajar - SITTA | Universitas Terbuka</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="img/logo_ut.png">
+</head>
+<body>
+    <!-- 🧭 NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="img/logo_ut.png" alt="Logo UT" class="nav-logo">
+            <span>SITTA UT</span>
+        </div>
+        <div class="nav-user">
+            <span class="user-role" id="userRole"></span>
+            <span id="userName"></span>
+            <button id="logoutBtn" class="logout-btn">🚪 Keluar</button>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- 📂 SIDEBAR -->
+        <aside class="sidebar">
+            <ul class="menu">
+                <li><a href="dashboard.html">📊 Dashboard</a></li>
+                <li><a href="stok.html" class="active">📦 Stok Barang</a></li>
+                <li><a href="tracking.html">📋 Tracking</a></li>
+            </ul>
+        </aside>
+
+        <!-- 📱 MAIN CONTENT -->
+        <main class="dashboard-content">
+            <!-- 🎯 PAGE HEADER -->
+            <div class="page-header">
+                <div>
+                    <h1>📦 Manajemen Stok</h1>
+                    <p>Kelola stok bahan ajar Universitas Terbuka</p>
+                </div>
+                <div class="page-actions">
+                    <div class="search-box">
+                        <input type="text" 
+                               id="searchStok" 
+                               placeholder="🔍 Cari berdasarkan nama, kode, atau lokasi..."
+                               autocomplete="off">
+                        <button id="refreshBtn" class="btn-secondary">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                    <div class="filter-tags">
+                        <span class="filter-tag active" data-filter="all">Semua</span>
+                        <span class="filter-tag" data-filter="low">Low Stock</span>
+                        <span class="filter-tag" data-filter="bmp">BMP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 STOK STATS -->
+            <div class="stats-row">
+                <div class="stat-mini primary">
+                    <span class="stat-label">Total Barang</span>
+                    <span class="stat-value" id="totalItems">0</span>
+                </div>
+                <div class="stat-mini success">
+                    <span class="stat-label">Total Stok</span>
+                    <span class="stat-value" id="totalQuantity">0</span>
+                </div>
+                <div class="stat-mini warning">
+                    <span class="stat-label">Low Stock</span>
+                    <span class="stat-value" id="lowStockCount">0</span>
+                </div>
+                <div class="stat-mini info">
+                    <span class="stat-label">Lokasi</span>
+                    <span class="stat-value" id="uniqueLocations">0</span>
+                </div>
+            </div>
+
+            <!-- 📋 STOK TABLE -->
+            <div class="table-container">
+                <table id="stokTable">
+                    <thead>
+                        <tr>
+                            <th><span>📍</span> Lokasi</th>
+                            <th><span>🏷️</span> Kode</th>
+                            <th><span>📖</span> Nama Barang</th>
+                            <th><span>🏷️</span> Jenis</th>
+                            <th><span>📋</span> Edisi</th>
+                            <th><span>📊</span> Stok</th>
+                            <th><span>📷</span> Cover</th>
+                            <th><span>⚙️</span> Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stokTableBody">
+                        <!-- Dynamic content loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 📈 QUICK INSIGHTS -->
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <h4>💡 Low Stock Alert</h4>
+                    <p id="lowStockAlert">2 barang dengan stok di bawah 200 unit</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill low-stock" style="width: 40%"></div>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <h4>📈 Stok Terbesar</h4>
+                    <p id="topStockItem">Pengantar Ilmu Komunikasi (548)</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill high-stock" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 📜 SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Stok Page Specific Scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStokTable();
+            updateStokStats();
+            initStokEvents();
+        });
+
+        function initStokEvents() {
+            // Filter tags
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter(this.dataset.filter);
+                });
+            });
+
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadStokTable();
+                updateStokStats();
+                showToast('Stok berhasil di-refresh!');
+            });
+        }
+
+        function updateStokStats() {
+            const dataBahanAjar = window.dataBahanAjar || [];
+            const lowStock = dataBahanAjar.filter(item => item.stok < 200).length;
+            const uniqueLocations = new Set(dataBahanAjar.map(item => item.kodeLokasi)).size;
+            const topItem = dataBahanAjar.reduce((max, item) => item.stok > max.stok ? item : max);
+
+            document.getElementById('totalItems').textContent = dataBahanAjar.length;
+            document.getElementById('totalQuantity').textContent = dataBahanAjar.reduce((sum, item) => sum + item.stok, 0).toLocaleString();
+            document.getElementById('lowStockCount').textContent = lowStock;
+            document.getElementById('uniqueLocations').textContent = uniqueLocations;
+            document.getElementById('lowStockAlert').textContent = `${lowStock} barang dengan stok < 200 unit`;
+            document.getElementById('topStockItem').textContent = `${topItem.namaBarang} (${topItem.stok})`;
+        }
+
+        function applyFilter(filter) {
+            const rows = document.querySelectorAll('#stokTableBody tr');
+            rows.forEach(row => {
+                const stok = parseInt(row.cells[5].textContent.replace(/[^\d]/g, ''));
+                const jenis = row.cells[3].textContent.trim();
+                
+                let show = false;
+                switch(filter) {
+                    case 'all':
+                        show = true;
+                        break;
+                    case 'low':
+                        show = stok < 200;
+                        break;
+                    case 'bmp':
+                        show = jenis === 'BMP';
+                        break;
+                }
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>

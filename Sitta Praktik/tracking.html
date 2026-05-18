@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Pengiriman - SITTA | Universitas Terbuka</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="img/logo_ut.png">
+    <meta name="description" content="Sistem Informasi Tracking & Tatalaksana Alat Universitas Terbuka">
+</head>
+<body>
+    <!-- 🧭 NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="img/logo_ut.png" alt="Logo UT" class="nav-logo">
+            <span>SITTA UT</span>
+        </div>
+        <div class="nav-user">
+            <span class="user-role" id="userRole"></span>
+            <span id="userName"></span>
+            <button id="logoutBtn" class="logout-btn">🚪 Keluar</button>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- 📂 SIDEBAR -->
+        <aside class="sidebar">
+            <ul class="menu">
+                <li><a href="dashboard.html"><span>📊</span> Dashboard</a></li>
+                <li><a href="stok.html"><span>📦</span> Stok Barang</a></li>
+                <li><a href="tracking.html" class="active"><span>📋</span> Tracking</a></li>
+            </ul>
+        </aside>
+
+        <!-- 📱 MAIN CONTENT -->
+        <main class="dashboard-content">
+            <!-- 🎯 PAGE HEADER -->
+            <div class="page-header">
+                <div class="header-left">
+                    <h1>📦 Tracking Pengiriman</h1>
+                    <p>Monitor status pengiriman bahan ajar UT secara real-time</p>
+                </div>
+                <div class="search-box">
+                    <input type="text" 
+                           id="searchTracking" 
+                           placeholder="🔍 Ketik Nomor DO (contoh: 2023001234)"
+                           maxlength="15"
+                           autocomplete="off">
+                    <button id="trackBtn">
+                        <span>🚀</span> Track
+                    </button>
+                </div>
+            </div>
+
+            <!-- ⚡ QUICK TRACK -->
+            <div class="quick-track">
+                <h3>⚡ Quick Track (Terbaru)</h3>
+                <div class="quick-buttons">
+                    <button class="quick-btn primary" onclick="quickTrack('2023001234')">
+                        2023001234
+                    </button>
+                    <button class="quick-btn success" onclick="quickTrack('2023005678')">
+                        2023005678 ✅
+                    </button>
+                    <button class="quick-btn warning" onclick="quickTrack('2023009999')">
+                        2023009999
+                    </button>
+                </div>
+            </div>
+
+            <!-- 📊 TRACKING RESULT -->
+            <div id="trackingResult" class="tracking-placeholder">
+                <div class="placeholder-content">
+                    <div class="placeholder-icon">📦</div>
+                    <h3>Selamat Datang di Tracking</h3>
+                    <p>Masukkan nomor DO 10 digit untuk melacak pengiriman Anda</p>
+                    <div class="placeholder-hint">
+                        <strong>💡 Tips:</strong> Nomor DO biasanya dimulai dengan 2023...
+                    </div>
+                    <div class="quick-demo">
+                        <span>Coba klik tombol Quick Track di atas!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📈 STATS CARD -->
+            <div class="tracking-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div>
+                        <h4>Total Pengiriman</h4>
+                        <span id="totalPaket" class="stat-number">3</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon warning">🚚</div>
+                    <div>
+                        <h4>Dalam Perjalanan</h4>
+                        <span id="dalamPerjalanan" class="stat-number">1</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info">📤</div>
+                    <div>
+                        <h4>Sudah Dikirim</h4>
+                        <span id="dikirim" class="stat-number">1</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success">✅</div>
+                    <div>
+                        <h4>Selesai</h4>
+                        <span id="selesai" class="stat-number">1</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 📜 SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- 🎛️ TRACKING SPECIFIC SCRIPTS -->
+    <script>
+        // Quick Track Functions
+        function quickTrack(nomorDO) {
+            const input = document.getElementById('searchTracking');
+            input.value = nomorDO;
+            input.focus();
+            handleTrackingSearch();
+        }
+
+        // Auto Stats Update
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTrackingStats();
+            
+            // Demo animation
+            setTimeout(() => {
+                const placeholder = document.querySelector('.placeholder-content');
+                placeholder.style.animation = 'fadeIn 1s ease-out';
+            }, 500);
+        });
+
+        // Enter key support
+        document.getElementById('searchTracking')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleTrackingSearch();
+            }
+        });
+
+        function updateTrackingStats() {
+            const stats = {
+                total: Object.keys(dataTracking || {}).length || 0,
+                dalamPerjalanan: Object.values(dataTracking || {}).filter(t => t.status === 'Dalam Perjalanan').length || 0,
+                dikirim: Object.values(dataTracking || {}).filter(t => t.status === 'Dikirim').length || 0,
+                selesai: Object.values(dataTracking || {}).filter(t => t.status === 'Selesai').length || 0
+            };
+            
+            document.getElementById('totalPaket').textContent = stats.total;
+            document.getElementById('dalamPerjalanan').textContent = stats.dalamPerjalanan;
+            document.getElementById('dikirim').textContent = stats.dikirim;
+            document.getElementById('selesai').textContent = stats.selesai;
+        }
+    </script>
+</body>
+</html>

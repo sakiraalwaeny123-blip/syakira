@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SITTA - Universitas Terbuka</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="img/logo_ut.png">
+</head>
+<body>
+    <!-- 🧭 NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="img/logo_ut.png" alt="Logo UT" class="nav-logo">
+            <span>SITTA UT</span>
+        </div>
+        <div class="nav-user">
+            <span class="user-role" id="userRole"></span>
+            <span id="userName"></span>
+            <button id="logoutBtn" class="logout-btn">🚪 Keluar</button>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- 📂 SIDEBAR -->
+        <aside class="sidebar">
+            <ul class="menu">
+                <li><a href="dashboard.html" class="active"><span>📊</span> Dashboard</a></li>
+                <li><a href="stok.html"><span>📦</span> Stok Barang</a></li>
+                <li><a href="tracking.html"><span>📋</span> Tracking</a></li>
+            </ul>
+        </aside>
+
+        <!-- 📱 MAIN CONTENT -->
+        <main class="dashboard-content">
+            <!-- 🎯 HEADER -->
+            <div class="page-header">
+                <div>
+                    <h1>📊 Dashboard</h1>
+                    <p>Overview SITTA Universitas Terbuka - <strong id="currentDate"></strong></p>
+                </div>
+            </div>
+
+            <!-- 📈 STATS GRID -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">📚</div>
+                    <div>
+                        <h3>Jenis Barang</h3>
+                        <span class="stat-number" id="totalBarang">0</span>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">📦</div>
+                    <div>
+                        <h3>Total Stok</h3>
+                        <span class="stat-number" id="stokTersedia">0</span>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">⚠️</div>
+                    <div>
+                        <h3>Low Stock</h3>
+                        <span class="stat-number" id="lowStock">0</span>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">🚚</div>
+                    <div>
+                        <h3>Paket Aktif</h3>
+                        <span class="stat-number" id="paketAktif">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- 📊 CHART CARD -->
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3>📈 Stok per Lokasi</h3>
+                        <div class="legend">
+                            <span class="legend-item high">Stok Tinggi</span>
+                            <span class="legend-item low">Low Stock</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="stokChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- 📋 RECENT ACTIVITY -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Aktivitas Terbaru</h3>
+                        <a href="tracking.html" class="view-all">Lihat Semua →</a>
+                    </div>
+                    <div id="recentList" class="recent-list">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- 👥 USER INFO -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>👤 Informasi Pengguna</h3>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <img src="img/logo_ut.png" alt="Avatar">
+                        </div>
+                        <div class="user-details">
+                            <h4 id="userFullName">Loading...</h4>
+                            <p id="userRoleInfo">Loading...</p>
+                            <p id="userLocation">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 📜 SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Dashboard Specific Scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            updateDate();
+            initChart();
+        });
+
+        function updateDate() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options);
+        }
+
+        function initChart() {
+            // Simple bar chart using Canvas
+            const canvas = document.getElementById('stokChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const dataBahanAjar = window.dataBahanAjar || [];
+            
+            // Chart dimensions
+            const barWidth = 50;
+            const maxHeight = 150;
+            const maxStok = Math.max(...dataBahanAjar.map(item => item.stok), 100);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw bars
+            dataBahanAjar.forEach((item, index) => {
+                const x = index * 70 + 30;
+                const height = (item.stok / maxStok) * maxHeight;
+                const isLow = item.stok < 200;
+                
+                // Bar
+                ctx.fillStyle = isLow ? '#ef4444' : '#10b981';
+                ctx.fillRect(x, canvas.height - height - 20, barWidth, height);
+                
+                // Bar border
+                ctx.strokeStyle = isLow ? '#dc2626' : '#059669';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, canvas.height - height - 20, barWidth, height);
+                
+                // Label
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '12px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.kodeLokasi, x + barWidth/2, canvas.height - 5);
+                
+                // Value
+                ctx.fillStyle = isLow ? '#fee2e2' : '#d1fae5';
+                ctx.font = 'bold 11px Segoe UI';
+                ctx.fillText(item.stok, x + barWidth/2, canvas.height - height - 25);
+            });
+            
+            // Axes
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(20, 20);
+            ctx.lineTo(20, canvas.height - 20);
+            ctx.lineTo(canvas.width - 20, canvas.height - 20);
+            ctx.stroke();
+        }
+    </script>
+</body>
+</html>
