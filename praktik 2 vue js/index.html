@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SITTA UT</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Vue JS -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+
+  <!-- Data -->
+  <script src="dataBahanAjar.js"></script>
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <div class="logo-area">
+        <img src="img/Logo_ut.png" alt="Logo UT" class="logo">
+
+        <div>
+          <h1>SITTA UT</h1>
+          <p>Sistem Informasi Tracking & Tatalaksana Bahan Ajar</p>
+        </div>
+      </div>
+
+      <nav>
+        <a href="index.html">Dashboard</a>
+        <a href="stok.html">Stok</a>
+        <a href="tracking.html">Tracking</a>
+      </nav>
+
+    </header>
+
+    <!-- MAIN -->
+    <main class="dashboard">
+
+      <!-- HERO -->
+      <section class="hero">
+
+        <h2>Selamat Datang di SITTA Universitas Terbuka</h2>
+
+        <p>
+          Sistem ini digunakan untuk pengelolaan stok bahan ajar,
+          monitoring Delivery Order (DO),
+          dan tracking pengiriman mahasiswa Universitas Terbuka.
+        </p>
+
+      </section>
+
+      <!-- STATISTIK -->
+      <section class="menu-card">
+
+        <div class="card">
+          <h3>📚 Total Bahan Ajar</h3>
+          <h1>{{ stok.length }}</h1>
+
+          <p>
+            Jumlah seluruh data bahan ajar
+            yang tersedia di sistem.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>📦 Total Stok</h3>
+          <h1>{{ totalStok }}</h1>
+
+          <p>
+            Total keseluruhan stok bahan ajar
+            dari semua UPBJJ.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>⚠️ Stok Menipis</h3>
+          <h1>{{ stokMenipis.length }}</h1>
+
+          <p>
+            Bahan ajar yang perlu segera
+            dilakukan reorder.
+          </p>
+        </div>
+
+      </section>
+
+      <!-- MENU -->
+      <section class="menu-card">
+
+        <a href="stok.html" class="card">
+          <h3>📦 Kelola Stok</h3>
+
+          <p>
+            Mengelola stok bahan ajar,
+            filter data,
+            update stok,
+            dan tambah data baru.
+          </p>
+        </a>
+
+        <a href="tracking.html" class="card">
+          <h3>🚚 Tracking Delivery Order</h3>
+
+          <p>
+            Membuat DO,
+            melihat data pesanan,
+            dan tracking pengiriman mahasiswa.
+          </p>
+        </a>
+
+      </section>
+
+      <!-- TABEL STOK MENIPIS -->
+      <section class="panel">
+
+        <h2>Daftar Stok Menipis</h2>
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Judul</th>
+                <th>UPBJJ</th>
+                <th>Qty</th>
+                <th>Safety</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr
+                v-for="item in stokMenipis"
+                :key="item.kode"
+              >
+                <td>{{ item.kode }}</td>
+                <td>{{ item.judul }}</td>
+                <td>{{ item.upbjj }}</td>
+                <td>{{ item.qty }}</td>
+                <td>{{ item.safety }}</td>
+
+                <td>
+
+                  <span
+                    class="badge warning"
+                    v-if="item.qty > 0"
+                  >
+                    Menipis
+                  </span>
+
+                  <span
+                    class="badge danger"
+                    v-else
+                  >
+                    Kosong
+                  </span>
+
+                </td>
+              </tr>
+
+              <tr v-if="stokMenipis.length === 0">
+                <td colspan="6" class="empty">
+                  Tidak ada stok menipis.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2026 Universitas Terbuka</p>
+    </footer>
+
+  </div>
+
+  <!-- VUE INDEX -->
+  <script>
+    new Vue({
+      el: "#app",
+
+      data: {
+        stok: dataBahanAjar
+      },
+
+      computed: {
+        totalStok() {
+          return this.stok.reduce((total, item) => {
+            return total + item.qty;
+          }, 0);
+        },
+
+        stokMenipis() {
+          return this.stok.filter(item => {
+            return item.qty <= item.safety;
+          });
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
