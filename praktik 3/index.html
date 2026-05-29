@@ -3,87 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITTA UT - Bahan Ajar</title>
+
+    <title>SITTA Universitas Terbuka</title>
 
     <link rel="stylesheet" href="assets/css/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 </head>
+
 <body>
 
 <div id="app">
 
+    <!-- HEADER -->
+
     <header>
-        <img src="assets/img/logo_ut.png" alt="Logo UT" class="logo-ut">
+
+        <img
+            src="assets/img/logo_ut.png"
+            alt="Logo UT"
+            class="logo-ut">
 
         <div>
             <h1>SITTA Universitas Terbuka</h1>
-            <p>Sistem Informasi Tiras dan Transaksi Bahan Ajar</p>
+            <p>
+                Sistem Informasi Tiras dan Transaksi
+                Bahan Ajar
+            </p>
         </div>
+
     </header>
 
+    <!-- MENU -->
+
     <nav>
-        <button @click="tab='stok'">Stok Bahan Ajar</button>
-        <button @click="tab='tracking'">Tracking DO</button>
-        <button @click="tab='order'">Pemesanan</button>
+
+        <button @click="tab='stok'">
+            📚 Stok Bahan Ajar
+        </button>
+
+        <button @click="tab='tracking'">
+            🚚 Tracking DO
+        </button>
+
+        <button @click="tab='order'">
+            📝 Pemesanan
+        </button>
+
     </nav>
 
-    <main>
-        <section v-show="tab === 'stok'">
-            <ba-stock-table
-                :items="stok"
-                :upbjj-list="upbjjList"
-                :kategori-list="kategoriList">
-            </ba-stock-table>
-        </section>
+    <!-- STOK -->
 
-        <section v-show="tab === 'tracking'">
-            <do-tracking
-                :tracking="tracking">
-            </do-tracking>
-        </section>
+    <section v-show="tab==='stok'">
 
-        <section v-show="tab === 'order'">
-            <order-form
-                :paket="paket"
-                :ekspedisi="pengirimanList">
-            </order-form>
-        </section>
-    </main>
+        <ba-stock-table
+            :items="stok"
+            :upbjj-list="upbjjList"
+            :kategori-list="kategoriList">
+        </ba-stock-table>
+
+    </section>
+
+    <!-- TRACKING -->
+
+    <section v-show="tab==='tracking'">
+
+        <do-tracking
+            :tracking="tracking">
+        </do-tracking>
+
+    </section>
+
+    <!-- ORDER -->
+
+    <section v-show="tab==='order'">
+
+        <order-form
+            :paket="paket"
+            :ekspedisi="pengirimanList"
+            :tracking="tracking">
+        </order-form>
+
+    </section>
 
 </div>
+
+<!-- TEMPLATE COMPONENT -->
 
 <div id="templates"></div>
 
 <script>
-    Promise.all([
-        fetch("templates/stock-table.html").then(res => res.text()),
-        fetch("templates/do-tracking.html").then(res => res.text()),
-        fetch("templates/order-form.html").then(res => res.text()),
-        fetch("templates/status-badge.html").then(res => res.text())
-    ]).then(templates => {
-        document.getElementById("templates").innerHTML = templates.join("");
 
-        const scriptApi = document.createElement("script");
-        scriptApi.src = "js/services/api.js";
-        document.body.appendChild(scriptApi);
+Promise.all([
 
-        scriptApi.onload = function () {
-            const files = [
-                "js/components/status-badge.js",
-                "js/components/stock-table.js",
-                "js/components/do-tracking.js",
-                "js/components/order-form.js",
-                "js/app.js"
-            ];
+    fetch("templates/stock-table.html")
+    .then(res => res.text()),
 
-            files.forEach(src => {
-                const script = document.createElement("script");
-                script.src = src;
-                document.body.appendChild(script);
-            });
+    fetch("templates/do-tracking.html")
+    .then(res => res.text()),
+
+    fetch("templates/order-form.html")
+    .then(res => res.text()),
+
+    fetch("templates/status-badge.html")
+    .then(res => res.text())
+
+]).then(template => {
+
+    document
+        .getElementById("templates")
+        .innerHTML = template.join("");
+
+    loadScripts();
+
+});
+
+function loadScripts() {
+
+    const scripts = [
+
+        "js/services/api.js",
+
+        "js/components/status-badge.js",
+
+        "js/components/stock-table.js",
+
+        "js/components/do-tracking.js",
+
+        "js/components/order-form.js",
+
+        "js/app.js"
+
+    ];
+
+    let index = 0;
+
+    function next() {
+
+        if(index >= scripts.length){
+            return;
+        }
+
+        const script =
+            document.createElement("script");
+
+        script.src = scripts[index];
+
+        script.onload = function () {
+
+            index++;
+
+            next();
+
         };
-    });
+
+        document.body.appendChild(script);
+
+    }
+
+    next();
+}
+
 </script>
 
 </body>
