@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITTA UT - Bahan Ajar</title>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+    <header>
+        <img src="assets/img/Logo_ut.png" alt="Logo UT" class="logo-ut">
+
+        <div>
+            <h1>SITTA Universitas Terbuka</h1>
+            <p>Sistem Informasi Tiras dan Transaksi Bahan Ajar</p>
+        </div>
+    </header>
+
+    <nav>
+        <button @click="tab='stok'">Stok Bahan Ajar</button>
+        <button @click="tab='tracking'">Tracking DO</button>
+        <button @click="tab='order'">Pemesanan</button>
+    </nav>
+
+    <main>
+        <section v-show="tab === 'stok'">
+            <ba-stock-table
+                :items="stok"
+                :upbjj-list="upbjjList"
+                :kategori-list="kategoriList">
+            </ba-stock-table>
+        </section>
+
+        <section v-show="tab === 'tracking'">
+            <do-tracking
+                :tracking="tracking">
+            </do-tracking>
+        </section>
+
+        <section v-show="tab === 'order'">
+            <order-form
+                :paket="paket"
+                :ekspedisi="pengirimanList">
+            </order-form>
+        </section>
+    </main>
+
+</div>
+
+<div id="templates"></div>
+
+<script>
+    Promise.all([
+        fetch("templates/stock-table.html").then(res => res.text()),
+        fetch("templates/do-tracking.html").then(res => res.text()),
+        fetch("templates/order-form.html").then(res => res.text()),
+        fetch("templates/status-badge.html").then(res => res.text())
+    ]).then(templates => {
+        document.getElementById("templates").innerHTML = templates.join("");
+
+        const scriptApi = document.createElement("script");
+        scriptApi.src = "js/services/api.js";
+        document.body.appendChild(scriptApi);
+
+        scriptApi.onload = function () {
+            const files = [
+                "js/components/status-badge.js",
+                "js/components/stock-table.js",
+                "js/components/do-tracking.js",
+                "js/components/order-form.js",
+                "js/app.js"
+            ];
+
+            files.forEach(src => {
+                const script = document.createElement("script");
+                script.src = src;
+                document.body.appendChild(script);
+            });
+        };
+    });
+</script>
+
+</body>
+</html>

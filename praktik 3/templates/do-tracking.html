@@ -1,0 +1,57 @@
+<template id="tpl-tracking">
+
+<div class="card">
+
+    <h2>Tracking Delivery Order</h2>
+
+    <div class="search-box">
+        <input
+            type="text"
+            v-model="keyword"
+            placeholder="Cari berdasarkan Nomor DO atau NIM"
+            @keyup.esc="resetCari">
+    </div>
+
+    <div v-if="hasilTracking.length === 0">
+        <p>Data tracking tidak ditemukan.</p>
+    </div>
+
+    <div
+        class="tracking-card"
+        v-for="item in hasilTracking">
+
+        <div v-for="(data, noDO) in item">
+
+            <h3>{{ noDO }}</h3>
+
+            <p><strong>NIM:</strong> {{ data.nim }}</p>
+            <p><strong>Nama:</strong> {{ data.nama }}</p>
+            <p><strong>Status:</strong> {{ data.status }}</p>
+            <p><strong>Ekspedisi:</strong> {{ data.ekspedisi }}</p>
+            <p><strong>Tanggal Kirim:</strong> {{ data.tanggalKirim }}</p>
+            <p><strong>Total:</strong> Rp {{ data.total.toLocaleString('id-ID') }}</p>
+
+            <h4>Riwayat Perjalanan</h4>
+
+            <ul>
+                <li v-for="jalan in data.perjalanan">
+                    {{ jalan.waktu }} - {{ jalan.keterangan }}
+                </li>
+            </ul>
+
+            <input
+                type="text"
+                v-model="keteranganBaru"
+                placeholder="Tambah keterangan perjalanan">
+
+            <button class="btn-success" @click="tambahProgress(data)">
+                Tambah Progress
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</template>

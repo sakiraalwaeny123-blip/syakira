@@ -1,0 +1,53 @@
+<template id="tpl-order">
+
+<div class="card">
+
+    <h2>Form Pemesanan Bahan Ajar</h2>
+
+    <form @submit.prevent="simpanDO">
+
+        <label>NIM</label>
+        <input type="text" v-model="form.nim" placeholder="Masukkan NIM">
+
+        <label>Nama</label>
+        <input type="text" v-model="form.nama" placeholder="Masukkan Nama">
+
+        <label>Paket Bahan Ajar</label>
+        <select v-model="form.paket">
+            <option value="">Pilih Paket</option>
+            <option v-for="p in paket" :value="p.kode">
+                {{ p.kode }} - {{ p.nama }}
+            </option>
+        </select>
+
+        <div v-if="paketDipilih">
+            <p><strong>Isi Paket:</strong></p>
+            <ul>
+                <li v-for="isi in paketDipilih.isi">
+                    {{ isi }}
+                </li>
+            </ul>
+
+            <p>
+                <strong>Total Harga:</strong>
+                Rp {{ paketDipilih.harga.toLocaleString('id-ID') }}
+            </p>
+        </div>
+
+        <label>Ekspedisi</label>
+        <select v-model="form.ekspedisi">
+            <option value="">Pilih Ekspedisi</option>
+            <option v-for="e in ekspedisi" :value="e.kode">
+                {{ e.nama }}
+            </option>
+        </select>
+
+        <button type="submit" class="btn-primary">
+            Simpan Pemesanan
+        </button>
+
+    </form>
+
+</div>
+
+</template>
